@@ -1,6 +1,6 @@
 ## Getting Started
 
-* Make a docker image:
+1. Make a docker image:
 
-    $ cd klee
-    $ docker build -t klee/klee .
+        $ cd klee
+        $ docker build -t klee/klee .
