@@ -1,1 +1,2 @@
 klee = [git]https://github.com/klee/klee.git
+pylstar = [git]https://github.com/gbossert/pylstar.git
