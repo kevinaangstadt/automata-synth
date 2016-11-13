@@ -2,5 +2,5 @@
 
 * Make a docker image:
 
-	$ cd klee
-	$ docker build -t klee/klee .
+    $ cd klee
+    $ docker build -t klee/klee .
