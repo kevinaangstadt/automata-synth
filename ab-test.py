@@ -56,7 +56,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             #there is a bug that means that vasim crashes if it's empty
                             if os.stat(tmp2).st_size == 0:
                                 os.remove(tmp2)
-                                pass
+                                continue
                         
                             vasim = subprocess.check_output("./vasim/vasim -r " +  tmp + ' ' + tmp2,shell=True).split("\n")
                             
