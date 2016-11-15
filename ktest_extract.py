@@ -21,7 +21,7 @@ def extract_output(data_list, variable):
     start = data_list[line_to_extract].find("'")
     end = data_list[line_to_extract].rfind("'")
     
-    return data_list[line_to_extract][start+1,end]
+    return data_list[line_to_extract][start+1:end]
 
 if __name__ == '__main__':
     import argparse, subprocess
