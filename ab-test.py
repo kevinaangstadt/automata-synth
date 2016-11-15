@@ -108,9 +108,9 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                         pass
                                     #then the c kernel said there was a report (it's backwards)
                                     return (False, output)
-                    return (True, None)
+            return (True, None)
         finally:
-                    os.remove(tmp)
+            os.remove(tmp)
 
 alphabet = ['a','b']
 mat = ABMat()
