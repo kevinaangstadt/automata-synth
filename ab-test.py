@@ -10,6 +10,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
         self.verbose = verbose
     
     def isMember(self, inp):
+        super(ABMat, self).isMember(inp)
         ret = subprocess.call('../ab-test/kernel "'+inp+'"', shell=True)
         if ret == 0:
             return True
@@ -17,6 +18,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             return False
     
     def isEquivalent(self, anml):
+        super(ABMat, self).isEquivalent(anml)
         if self.verbose >= lstar.LStarUtil.loud:
             print "=========================="
             print "| Checking if equivalent |"
@@ -156,5 +158,12 @@ alphabet = ['a','b']
 mat = ABMat(verbose = lstar.LStarUtil.loud)
 
 learner = lstar.LStar(alphabet, mat, verbose=lstar.LStarUtil.loud, seed=0)
+
+stats = mat.getStats()
+print "========================================="
+print "|              Final Stats              |"
+print "========================================="
+print "Number of Membership Queries:", stats['member_queries']
+print "Number of Equivalence Queries:", stats['equivalence_queries']
 
 print learner.learn()

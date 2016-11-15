@@ -18,7 +18,6 @@ class LStarUtil(object):
 
 class LStar(object):
     __empty = ''
-    __loud = 1
     
     def __init__(self, alphabet, mat, verbose=0, seed=None):
         '''Create an L* learner using finite alphabet and mat'''
