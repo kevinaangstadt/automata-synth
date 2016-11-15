@@ -27,6 +27,12 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             #now try all the klee tests
             for ktest in os.listdir('../ab-test/klee-last/'):
                 if ".ktest" in ktest:
+                    print ktest
+                    sys.stdout.flush()
+                    try:
+                        os.fsync(sys.stdout.fileno())
+                    except:
+                        pass
                     # this is a ktest
                     output = subprocess.check_output(["./ktest_extract.py", "re" , "../ab-test/klee-last/" + ktest]).strip()
                     
