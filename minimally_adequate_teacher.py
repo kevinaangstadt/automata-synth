@@ -7,7 +7,7 @@
 class MinimallyAdequateTeacher(object):
     
     def __init__(self):
-        self.stats = dict([(member_queries,0),(equivalence_queries,0)])
+        self.stats = dict([("member_queries",0),("equivalence_queries",0)])
         
         # override this to store any additional information a MAT might need
         pass
