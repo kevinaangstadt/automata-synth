@@ -26,8 +26,8 @@ def extract_output(data_list, variable):
 if __name__ == '__main__':
     import argparse, subprocess
     parser = argparse.ArgumentParser()
-    parser.add_argument(variable, help="the variable from which to extract input")
-    parser.add_argument(testfile, help="the testfile to process with ktest")
+    parser.add_argument("variable", help="the variable from which to extract input")
+    parser.add_argument("testfile", help="the testfile to process with ktest")
     
     args = parser.parse_args()
     
