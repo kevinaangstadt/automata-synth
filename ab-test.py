@@ -6,6 +6,7 @@ import subprocess
 
 class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
     def isMember(self, inp):
+        print "../ab-test/kernel", '"'+inp+'"'
         ret = subprocess.call(["../ab-test/kernel", '"'+inp+'"'])
         if ret == 0:
             return True
