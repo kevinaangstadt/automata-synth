@@ -159,11 +159,11 @@ mat = ABMat(verbose = lstar.LStarUtil.loud)
 
 learner = lstar.LStar(alphabet, mat, verbose=lstar.LStarUtil.loud, seed=0)
 
+print learner.learn()
+
 stats = mat.getStats()
 print "========================================="
 print "|              Final Stats              |"
 print "========================================="
 print "Number of Membership Queries:", stats['member_queries']
 print "Number of Equivalence Queries:", stats['equivalence_queries']
-
-print learner.learn()
