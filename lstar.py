@@ -11,6 +11,10 @@ import mnrl, mnrlerror
 import anml
 import random
 
+class LStarUtil(object):
+    loud = 1
+    louder = 2
+    loudest = 3
 
 class LStar(object):
     __empty = ''
@@ -42,7 +46,7 @@ class LStar(object):
             # first loop
             while True:
                 #print out the observation table if we're not consistent
-                if self.verbose >= LStar.__loud:
+                if self.verbose >= LStarUtil.loud:
                     print "====================="
                     print "| observation table |"
                     print "====================="
@@ -61,17 +65,17 @@ class LStar(object):
                 
                 closed = self.isClosed()
                 if not closed:
-                    if self.verbose >= LStar.__loud:
+                    if self.verbose >= LStarUtil.loud:
                         print "not closed"
                     self.__add_prefix()
                     
                 if consistent and closed:
                     # we are done
-                    if self.verbose >= LStar.__loud:
+                    if self.verbose >= LStarUtil.loud:
                         print "both consistent and closed"
                     break
                 
-                if self.verbose >= LStar.__loud:
+                if self.verbose >= LStarUtil.loud:
                     print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
             
             # once (S,E,T) is closed and consistent, let M = M(S,E,T).
@@ -258,7 +262,7 @@ class LStar(object):
                         suffix_we_added_to = e
                         found_new_suffix = True
             
-        if self.verbose >= LStar.__loud:
+        if self.verbose >= LStarUtil.loud:
             print "=========================="
             print "| This is not consistent |"
             print "=========================="

@@ -5,6 +5,10 @@ import lstar, minimally_adequate_teacher
 import subprocess,tempfile,os,sys
 
 class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
+    def __init__(self, verbose=0):
+        super(ABMat, self).__init__()
+        self.verbose = verbose
+    
     def isMember(self, inp):
         ret = subprocess.call('../ab-test/kernel "'+inp+'"', shell=True)
         if ret == 0:
@@ -13,37 +17,48 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             return False
     
     def isEquivalent(self, anml):
-        print "Checking if equivalent"
-        sys.stdout.flush()
-        try:
-            os.fsync(sys.stdout.fileno())
-        except:
-            pass
+        if self.verbose >= lstar.LStarUtil.loud:
+            print "=========================="
+            print "| Checking if equivalent |"
+            print "=========================="
+            sys.stdout.flush()
+            try:
+                os.fsync(sys.stdout.fileno())
+            except:
+                pass
         _,tmp = tempfile.mkstemp()
         try:
             with open(tmp, "w") as f:
                 f.write(str(anml))
             
             #now try all the klee tests
-            for kout in os.listdir("../ab-test"):
+            for kout in sorted(os.listdir("../ab-test")):
                 if "klee-out" in kout:
-                    print kout
+                    if self.verbose >= lstar.LStarUtil.louder:
+                        print "kout:", kout
+                        sys.stdout.flush()
+                        try:
+                            os.fsync(sys.stdout.fileno())
+                        except:
+                            pass
                     for ktest in os.listdir('../ab-test/' + kout + "/"):
                         if ".ktest" in ktest:
-                            print ktest
-                            sys.stdout.flush()
-                            try:
-                                os.fsync(sys.stdout.fileno())
-                            except:
-                                pass
+                            if self.verbose >= lstar.LStarUtil.loudest:
+                                print "ktest:", ktest
+                                sys.stdout.flush()
+                                try:
+                                    os.fsync(sys.stdout.fileno())
+                                except:
+                                    pass
                             # this is a ktest
                             output = subprocess.check_output(["./ktest_extract.py", "re" , "../ab-test/"+kout+"/" + ktest]).strip()
-                            print "output:",output
-                            sys.stdout.flush()
-                            try:
-                                os.fsync(sys.stdout.fileno())
-                            except:
-                                pass
+                            if self.verbose >= lstar.LStarUtil.loudest:
+                                print "output:",output
+                                sys.stdout.flush()
+                                try:
+                                    os.fsync(sys.stdout.fileno())
+                                except:
+                                    pass
                             
                             #output is the input to the tests
                             ret = subprocess.call('../ab-test/kernel "'+output+'"', shell=True)
@@ -67,12 +82,13 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             num_reports = int(vasim_reports[0][8:]) # prefix on reports is 8 long
                             
                             if num_reports > 0:
-                                print "number of reports:", num_reports
-                                sys.stdout.flush()
-                                try:
-                                    os.fsync(sys.stdout.fileno())
-                                except:
-                                    pass
+                                if self.verbose >= lstar.LStarUtil.loudest:
+                                    print "number of reports:", num_reports
+                                    sys.stdout.flush()
+                                    try:
+                                        os.fsync(sys.stdout.fileno())
+                                    except:
+                                        pass
                                     
                                 with open('reports_0tid_0packet.txt', "r") as f:
                                     reports = f.readlines()
@@ -82,36 +98,43 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                         if last_report != len(output) - 1:
                                             # this means vasim missed the final report,
                                             # but the kernel found it
-                                            print "last_report:",last_report
-                                            print "len(output)-1:", len(output)-1
-                                            print "output:",output
-                                            sys.stdout.flush()
-                                            try:
-                                                os.fsync(sys.stdout.fileno())
-                                            except:
-                                                pass
+                                            if self.verbose >= lstar.LStarUtil.loud:
+                                                print "FSM did not match"
+                                                print "c kernel did match"
+                                                print "last_report:",last_report
+                                                print "len(output)-1:", len(output)-1
+                                                print "output:",output
+                                                sys.stdout.flush()
+                                                try:
+                                                    os.fsync(sys.stdout.fileno())
+                                                except:
+                                                    pass
                                             return (False, output)
                                     else:
                                         if last_report == len(output) - 1:
                                             #vasim said this should report
-                                            print "c kernel said this wasn't a match:",output
-                                            sys.stdout.flush()
-                                            try:
-                                                os.fsync(sys.stdout.fileno())
-                                            except:
-                                                pass
+                                            if self.verbose >= lstar.LStarUtil.loud:
+                                                print "NFA found a match"
+                                                print "c kernel said this wasn't a match:",output
+                                                sys.stdout.flush()
+                                                try:
+                                                    os.fsync(sys.stdout.fileno())
+                                                except:
+                                                    pass
                                             # then the c kernel said there was no report (it's backwards)
                                             return (False, output)
                                             
                             else:
                                 # no reports according to vasim
                                 if ret == 0:
-                                    print "c kernel said this reported:", output
-                                    sys.stdout.flush()
-                                    try:
-                                        os.fsync(sys.stdout.fileno())
-                                    except:
-                                        pass
+                                    if self.verbose >= lstar.LStarUtil.loud:
+                                        print "NFA had no match"
+                                        print "c kernel said this reported:", output
+                                        sys.stdout.flush()
+                                        try:
+                                            os.fsync(sys.stdout.fileno())
+                                        except:
+                                            pass
                                     #then the c kernel said there was a report (it's backwards)
                                     return (False, output)
             return (True, None)
@@ -130,8 +153,8 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             os.remove(tmp)
 
 alphabet = ['a','b']
-mat = ABMat()
+mat = ABMat(verbose = lstar.LStarUtil.loud)
 
-learner = lstar.LStar(alphabet, mat, verbose=5, seed=0)
+learner = lstar.LStar(alphabet, mat, verbose=lstar.LStarUtil.loud, seed=0)
 
 print learner.learn()
