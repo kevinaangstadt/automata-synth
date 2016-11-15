@@ -58,6 +58,11 @@ class LStar(object):
                         for e in self.observe[s]:
                             output += ", " + str(self.observe[s][e])
                         print output
+                    sys.stdout.flush()
+                    try:
+                        os.fsync(sys.stdout.fileno())
+                    except:
+                        pass
                         
                 consistent = self.isConsistent()
                 if not consistent:
@@ -67,16 +72,31 @@ class LStar(object):
                 if not closed:
                     if self.verbose >= LStarUtil.loud:
                         print "not closed"
+                        sys.stdout.flush()
+                        try:
+                            os.fsync(sys.stdout.fileno())
+                        except:
+                            pass
                     self.__add_prefix()
                     
                 if consistent and closed:
                     # we are done
                     if self.verbose >= LStarUtil.loud:
                         print "both consistent and closed"
+                        sys.stdout.flush()
+                        try:
+                            os.fsync(sys.stdout.fileno())
+                        except:
+                            pass
                     break
                 
                 if self.verbose >= LStarUtil.loud:
                     print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+                    sys.stdout.flush()
+                    try:
+                        os.fsync(sys.stdout.fileno())
+                    except:
+                        pass
             
             # once (S,E,T) is closed and consistent, let M = M(S,E,T).
             machine = self.makeMachine()
@@ -95,6 +115,15 @@ class LStar(object):
                     if s not in self.observe:
                         self.observe[s] = self.__get_row(s)
         
+        if self.verbose >= LStarUtil.loud:
+            print "========================================="
+            print "| Found an FSM that passed all queries! |"
+            print "========================================="
+            sys.stdout.flush()
+            try:
+                os.fsync(sys.stdout.fileno())
+            except:
+                pass
         return machine
     
     def isConsistent(self):
@@ -270,6 +299,11 @@ class LStar(object):
             print "s_2= '" + s_2 + "'"
             print "e= '" + suffix_we_added_to + "'"
             print "a= '" +  new_suffix + "'"
+            sys.stdout.flush()
+            try:
+                os.fsync(sys.stdout.fileno())
+            except:
+                pass
         
         # add new rows (S \cup S + A)
         for s in self.observe.keys():
