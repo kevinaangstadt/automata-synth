@@ -49,16 +49,18 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             ret = subprocess.call('../ab-test/kernel "'+output+'"', shell=True)
                             
                             _,tmp2 = tempfile.mkstemp()
-                            try:
-                                with open(tmp2, "w") as f:
-                                    f.write(output)
+                            
+                            with open(tmp2, "w") as f:
+                                f.write(output)
                                 
-                                if os.stat(tmp2).st_size == 0:
-                                    pass
-                        
-                                vasim = subprocess.check_output("./vasim/vasim -r " +  tmp + ' ' + tmp2,shell=True).split("\n")
-                            finally:
+                            #there is a bug that means that vasim crashes if it's empty
+                            if os.stat(tmp2).st_size == 0:
                                 os.remove(tmp2)
+                                pass
+                        
+                            vasim = subprocess.check_output("./vasim/vasim -r " +  tmp + ' ' + tmp2,shell=True).split("\n")
+                            
+                            os.remove(tmp2)
                             
                             #vasim holds the output, we only need the last three lines
                             vasim_reports = vasim[-3:]
