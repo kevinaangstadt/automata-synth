@@ -2,7 +2,7 @@
 
 import lstar, minimally_adequate_teacher
 
-import subprocess,tempfile
+import subprocess,tempfile,os
 
 class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
     def isMember(self, inp):
@@ -13,28 +13,31 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             return False
     
     def isEquivalent(self, anml):
+        print "Checking if equivalent"
         _,tmp = tempfile.mkstemp()
         try:
             with open(tmp, "w") as f:
-                f.write(anml)
+                f.write(str(anml))
             
             #now try all the klee tests
             for ktest in os.listdir('../ab-test/klee-last/'):
                 if ".ktest" in ktest:
                     # this is a ktest
-                    output = subprocess.check_output(["./ktest_extract.py", "re" , "../ab-test/klee-last" + ktest]).strip()
+                    output = subprocess.check_output(["./ktest_extract.py", "re" , "../ab-test/klee-last/" + ktest]).strip()
                     
                     #output is the input to the tests
-                    ret = subprocess.call('../ab-test/kernel "'+inp+'"', shell=True)
+                    ret = subprocess.call('../ab-test/kernel "'+output+'"', shell=True)
                     
-                    vasim = subprocess.check_output(["./vasim/vasim", "-r", tempfile, '-i "' + output + '"']).split("\n")
+                    vasim = subprocess.check_output("./vasim/vasim -r " +  tmp + ' -i "' + output + '"',shell=True).split("\n")
                     
-                    #vasim holds the output, we only need the last two lines
-                    vasim_reports = vasim[-2:]
-                    num_reports = int(vasim_reports[0][9:]) # prefix on reports is 9 long
+                    #vasim holds the output, we only need the last three lines
+                    vasim_reports = vasim[-3:]
+                    num_reports = int(vasim_reports[0][8:]) # prefix on reports is 8 long
                     
                     if num_reports > 0:
+                        print "number of reports:", num_reports
                         if ret > 0:
+                            print "c kernel said this wasn't a match:",output
                             # then the c kernel said there was no report (it's backwards)
                             return (False, output)
                         with open('reports_0tid_0packet.txt', "r") as f:
@@ -42,10 +45,14 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             last_report = int(reports[-1].split(":")[0])
                             
                             if last_report != len(output) - 1:
+                                print "last_report:",last_report
+                                print "len(output)-1:", len(output)-1
+                                print "output:",output
                                 return (False, output)
                     else:
                         # no reports according to vasim
                         if ret == 0:
+                            print "c kernel said this reported:", output
                             #then the c kernel said there was a report (it's backwards)
                             return (False, output)
             return (True, None)
