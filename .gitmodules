@@ -1,3 +1,6 @@
+[submodule "vasim"]
+	path = vasim
+	url = https://github.com/jackwadden/vasim.git
 [submodule "pylstar"]
 	path = pylstar
 	url = https://github.com/gbossert/pylstar.git
