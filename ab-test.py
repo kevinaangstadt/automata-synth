@@ -109,6 +109,17 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                     #then the c kernel said there was a report (it's backwards)
                                     return (False, output)
             return (True, None)
+        except Exception as a:
+            print "something went wrong"
+            print "error:", a
+            print "waiting for enter to break"
+            sys.stdout.flush()
+            try:
+                os.fsync(sys.stdout.fileno())
+            except:
+                pass
+            raw_input()
+            exit(20)
         finally:
             os.remove(tmp)
 
