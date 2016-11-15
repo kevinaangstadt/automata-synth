@@ -13,9 +13,8 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             return False
     
     def isEquivalent(self, anml):
+        _,tempfile = tempfile.mkstemp()
         try:
-            _,tempfile = tempfile.mkstemp()
-            
             with open(tempfile, "w") as f:
                 f.write(anml)
             

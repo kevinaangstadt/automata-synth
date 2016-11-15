@@ -16,3 +16,15 @@
 4. Install `nano` and `mercurial`
 
 5. Clone this repository
+
+6. Install more dependencies
+
+        $ sudo apt-get install software-properties-common python-software-properties
+        $ sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        $ sudo apt-get update
+        $ sudo apt-get install gcc-5 g++-5
+
+7. Make VASim
+
+        $ cd vasim
+        $ make
