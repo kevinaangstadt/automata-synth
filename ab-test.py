@@ -13,9 +13,9 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             return False
     
     def isEquivalent(self, anml):
-        _,tempfile = tempfile.mkstemp()
+        _,tmp = tempfile.mkstemp()
         try:
-            with open(tempfile, "w") as f:
+            with open(tmp, "w") as f:
                 f.write(anml)
             
             #now try all the klee tests
@@ -50,7 +50,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             return (False, output)
             return (True, None)
         finally:
-            os.remove(tempfile)
+            os.remove(tmp)
 
 alphabet = ['a','b']
 mat = ABMat()
