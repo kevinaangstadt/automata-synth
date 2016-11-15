@@ -2,7 +2,7 @@
 
 import lstar, minimally_adequate_teacher
 
-import subprocess,tempfile,os
+import subprocess,tempfile,os,sys
 
 class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
     def isMember(self, inp):
@@ -14,6 +14,11 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
     
     def isEquivalent(self, anml):
         print "Checking if equivalent"
+        sys.stdout.flush()
+        try:
+            os.fsync(sys.stdout.fileno())
+        except:
+            pass
         _,tmp = tempfile.mkstemp()
         try:
             with open(tmp, "w") as f:
@@ -28,7 +33,13 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                     #output is the input to the tests
                     ret = subprocess.call('../ab-test/kernel "'+output+'"', shell=True)
                     
-                    vasim = subprocess.check_output("./vasim/vasim -r " +  tmp + ' -i "' + output + '"',shell=True).split("\n")
+                    _,tmp2 = tempfile.mkstemp()
+                    with open(tmp2, "w") as f:
+                        f.write(output)
+                
+                    vasim = subprocess.check_output("./vasim/vasim -r " +  tmp + ' ' + tmp2,shell=True).split("\n")
+                    
+                    os.remove(tmp2)
                     
                     #vasim holds the output, we only need the last three lines
                     vasim_reports = vasim[-3:]
@@ -36,8 +47,18 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                     
                     if num_reports > 0:
                         print "number of reports:", num_reports
+                        sys.stdout.flush()
+                        try:
+                            os.fsync(sys.stdout.fileno())
+                        except:
+                            pass
                         if ret > 0:
                             print "c kernel said this wasn't a match:",output
+                            sys.stdout.flush()
+                            try:
+                                os.fsync(sys.stdout.fileno())
+                            except:
+                                pass
                             # then the c kernel said there was no report (it's backwards)
                             return (False, output)
                         with open('reports_0tid_0packet.txt', "r") as f:
@@ -48,11 +69,21 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                 print "last_report:",last_report
                                 print "len(output)-1:", len(output)-1
                                 print "output:",output
+                                sys.stdout.flush()
+                                try:
+                                    os.fsync(sys.stdout.fileno())
+                                except:
+                                    pass
                                 return (False, output)
                     else:
                         # no reports according to vasim
                         if ret == 0:
                             print "c kernel said this reported:", output
+                            sys.stdout.flush()
+                            try:
+                                os.fsync(sys.stdout.fileno())
+                            except:
+                                pass
                             #then the c kernel said there was a report (it's backwards)
                             return (False, output)
             return (True, None)
