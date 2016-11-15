@@ -27,6 +27,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             #now try all the klee tests
             for kout in os.listdir("../ab-test"):
                 if "klee-out" in kout:
+                    print kout
                     for ktest in os.listdir('../ab-test/' + kout + "/"):
                         if ".ktest" in ktest:
                             print ktest
@@ -36,7 +37,13 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             except:
                                 pass
                             # this is a ktest
-                            output = subprocess.check_output(["./ktest_extract.py", "re" , "../ab-test/klee-last/" + ktest]).strip()
+                            output = subprocess.check_output(["./ktest_extract.py", "re" , "../ab-test/"+kout+"/" + ktest]).strip()
+                            print "output:",output
+                            sys.stdout.flush()
+                            try:
+                                os.fsync(sys.stdout.fileno())
+                            except:
+                                pass
                             
                             #output is the input to the tests
                             ret = subprocess.call('../ab-test/kernel "'+output+'"', shell=True)
@@ -102,7 +109,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                     #then the c kernel said there was a report (it's backwards)
                                     return (False, output)
                     return (True, None)
-                finally:
+        finally:
                     os.remove(tmp)
 
 alphabet = ['a','b']
