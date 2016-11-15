@@ -22,12 +22,24 @@ class HammingMAT(minimally_adequate_teacher.MinimallyAdequateTeacher):
         return distance <= self.dist;
 
 class AStarBStarMAT(minimally_adequate_teacher.MinimallyAdequateTeacher):
+    def __init__(self):
+        self.first = True
+    
     def isMember(self, inp):
+        if inp == "aaaab":
+            return True
         check = re.match("^(a*|b*)$", inp)
         if check is None:
             return False
         else:
             return True
+    
+    def isEquivalent(self, _):
+        if self.first:
+            self.first = False
+            return (False, "aaaab")
+        else:
+            return (True, None)
 
 alphabet = ['a','b']
 mat = AStarBStarMAT()

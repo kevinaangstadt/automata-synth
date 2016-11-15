@@ -74,8 +74,6 @@ class LStar(object):
                 if self.verbose >= LStar.__loud:
                     print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
             
-            
-            
             # once (S,E,T) is closed and consistent, let M = M(S,E,T).
             machine = self.makeMachine()
             passed, counterexample = self.mat.isEquivalent(machine)
@@ -86,7 +84,12 @@ class LStar(object):
                 # If the teacher replies with a conter-example t, then
                 # add t and all its prefixes to S
                 #and extend T to (S \cup S + A) + E using membership queries.
-                pass
+                
+                # we need to add each prefix
+                for i in range(len(counterexample)+1):
+                    s = counterexample[0:i]
+                    if s not in self.observe:
+                        self.observe[s] = self.__get_row(s)
         
         return machine
     
@@ -154,7 +157,7 @@ class LStar(object):
                         break
                     
         # DEBUG
-        print mn.toJSON()
+        #print mn.toJSON()
         
         # okay, that's a mnrl definition, but we need to convert it to a
         # homogeneous ANML
@@ -164,7 +167,9 @@ class LStar(object):
         num_states = 0
         
         # each state from the mnrl states can now possibly map to multiple states
-        anml_states = dict.fromkeys(unique_rows, dict())
+        anml_states = dict.fromkeys(unique_rows)
+        for k in anml_states:
+            anml_states[k] = dict()
         
         # add all of the states 
         for s in unique_rows:
@@ -174,29 +179,35 @@ class LStar(object):
             for _,(_,src_list) in state.getInputConnections().iteritems():
                 # there is only one input, so this happens once
                 for src in src_list:
-                    print src
                     # we need to create a state with the transition from this port
                     # we'll map this to the current state name, but also indicate the input character we match
-                    anml_states[s][src['portId']] = an.AddSTE(
-                        src['portId'],
-                        anml.AnmlDefs.NO_START if mn.getNodeById(src['id']).enable == mnrl.MNRLDefs.ENABLE_ON_ACTIVATE_IN else anml.AnmlDefs.START_OF_DATA,
-                        match = state.report
-                    )
-                    num_states += 1
+                    
+                    # only make a new state if we haven't make one for that input symbol yet
+                    if src['portId'] not in anml_states[s]:
+                        anml_states[s][src['portId']] = an.AddSTE(
+                            src['portId'],
+                            anmlId = "_" + str(num_states),
+                            startType = anml.AnmlDefs.NO_START if mn.getNodeById(src['id']).enable == mnrl.MNRLDefs.ENABLE_ON_ACTIVATE_IN else anml.AnmlDefs.START_OF_DATA,
+                            match = state.report
+                        )
+                        num_states += 1
+        # at this point, the states have been made
         # add the transitions
-        '''for s in unique_rows:
-            state = mn.getNodeById(s)
-            outputs_in_mnrl_state = state.getOutputConnections()
-            _,inputs_in_mnrl_state = state.getInputConnections()[mnrl.MNRLDefs.STATE_INPUT]
-            for a,an_state in anml_states[s].iteritems():
-                #make outgoing connections
-                _,dest_list = outputs_in_mnrl_state[a]
-                for d in dest_list:
-                    for _,an_state_dest in anml_states[d['id']].iteritems():
-                        an.AddAnmlEdge(an_state, an_state_dest)
-                for src in inputs_in_mnrl_state:
-                    for _,an_state_src in anml_states[src['id']].iteritems():
-                        an.AddAnmlEdge(an_state_src, an_state)'''
+        for s in unique_rows:
+            mn_state = mn.getNodeById(s)
+            
+            for port, an_ste in anml_states[s].iteritems():
+                # for each of these nodes
+                # add in the transitions coming into the state from the original
+                for _,(_,src_list) in mn_state.getInputConnections().iteritems():
+                    # there is only one input, so this happens once
+                    for src in src_list:
+                        if src['portId'] == port:
+                            # this is the right state for this transition
+                            # now, there may be several states actually representing this mnrl state
+                            # so we need to make the connection from each
+                            for _,src_ste in anml_states[src['id']].iteritems():
+                                an.AddAnmlEdge(src_ste,an_ste)
         return an
     
     def __seen_before(self, row):
@@ -247,23 +258,23 @@ class LStar(object):
                         suffix_we_added_to = e
                         found_new_suffix = True
             
-            if self.verbose >= LStar.__loud:
-                print "=========================="
-                print "| This is not consistent |"
-                print "=========================="
-                print "s_1= '" + s_1 + "'"
-                print "s_2= '" + s_2 + "'"
-                print "e= '" + suffix_we_added_to + "'"
-                print "a= '" +  new_suffix + "'"
-            
-            # add new rows (S \cup S + A)
-            for s in self.observe.keys():
-                if s+new_suffix not in self.observe:
-                    self.observe[s+new_suffix] = self.__get_row(s+new_suffix)
-            
-            # add new column (E \cup {a + e})
-            for s in self.observe:
-                self.observe[s][new_column] = self.mat.isMember(s+new_column)
+        if self.verbose >= LStar.__loud:
+            print "=========================="
+            print "| This is not consistent |"
+            print "=========================="
+            print "s_1= '" + s_1 + "'"
+            print "s_2= '" + s_2 + "'"
+            print "e= '" + suffix_we_added_to + "'"
+            print "a= '" +  new_suffix + "'"
+        
+        # add new rows (S \cup S + A)
+        for s in self.observe.keys():
+            if s+new_suffix not in self.observe:
+                self.observe[s+new_suffix] = self.__get_row(s+new_suffix)
+        
+        # add new column (E \cup {a + e})
+        for s in self.observe:
+            self.observe[s][new_column] = self.mat.isMember(s+new_column)
     
     def __add_prefix(self):
         # then find s_1 \in S and a \in A such that
