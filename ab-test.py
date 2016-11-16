@@ -54,7 +54,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                 except:
                                     pass
                             # this is a ktest
-                            output = subprocess.check_output(["./ktest_extract.py", "re" , self.src_dir+kout+"/" + ktest]).strip()
+                            output = subprocess.check_output(["./ktest_extract.py", "re" , self.src_dir+"/"+kout+"/" + ktest]).strip()
                             if self.verbose >= lstar.LStarUtil.loudest:
                                 print "output:",output
                                 sys.stdout.flush()
