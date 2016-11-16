@@ -44,7 +44,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             os.fsync(sys.stdout.fileno())
                         except:
                             pass
-                    for ktest in os.listdir(self.src_dir + kout + "/"):
+                    for ktest in os.listdir(self.src_dir +"/"+ kout + "/"):
                         if ".ktest" in ktest:
                             if self.verbose >= lstar.LStarUtil.loudest:
                                 print "ktest:", ktest
