@@ -12,11 +12,16 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
     
     def isMember(self, inp):
         super(ABMat, self).isMember(inp)
-        ret = subprocess.call(self.src_dir + '/kernel "'+inp+'"', shell=True)
-        if ret == 0:
-            return True
+        
+        cached = self.getChache(inp)
+        if cached is None:
+            ret = subprocess.call(self.src_dir + '/kernel "'+inp+'"', shell=True)
+            if ret == 0:
+                return self.addCache(inp,True)
+            else:
+                return self.addCache(inp,False)
         else:
-            return False
+            return cached
     
     def isEquivalent(self, anml):
         super(ABMat, self).isEquivalent(anml)
@@ -166,5 +171,5 @@ stats = mat.getStats()
 print "========================================="
 print "|              Final Stats              |"
 print "========================================="
-print "Number of Membership Queries:", stats['member_queries']
-print "Number of Equivalence Queries:", stats['equivalence_queries']
+for k,v in self.stats.iteritems():
+    print k,"=",v
