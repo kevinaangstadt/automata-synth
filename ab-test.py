@@ -5,13 +5,14 @@ import lstar, minimally_adequate_teacher
 import subprocess,tempfile,os,sys
 
 class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
-    def __init__(self, verbose=0):
+    def __init__(self, src_dir, verbose=0):
         super(ABMat, self).__init__()
         self.verbose = verbose
+        self.src_dir = src_dir
     
     def isMember(self, inp):
         super(ABMat, self).isMember(inp)
-        ret = subprocess.call('../ab-test/kernel "'+inp+'"', shell=True)
+        ret = subprocess.call(self.src_dir + '/kernel "'+inp+'"', shell=True)
         if ret == 0:
             return True
         else:
@@ -34,7 +35,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                 f.write(str(anml))
             
             #now try all the klee tests
-            for kout in sorted(os.listdir("../ab-test")):
+            for kout in sorted(os.listdir(self.src_dir)):
                 if "klee-out" in kout:
                     if self.verbose >= lstar.LStarUtil.louder:
                         print "kout:", kout
@@ -43,7 +44,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             os.fsync(sys.stdout.fileno())
                         except:
                             pass
-                    for ktest in os.listdir('../ab-test/' + kout + "/"):
+                    for ktest in os.listdir(self.src_dir + kout + "/"):
                         if ".ktest" in ktest:
                             if self.verbose >= lstar.LStarUtil.loudest:
                                 print "ktest:", ktest
@@ -53,7 +54,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                 except:
                                     pass
                             # this is a ktest
-                            output = subprocess.check_output(["./ktest_extract.py", "re" , "../ab-test/"+kout+"/" + ktest]).strip()
+                            output = subprocess.check_output(["./ktest_extract.py", "re" , self.src_dir+kout+"/" + ktest]).strip()
                             if self.verbose >= lstar.LStarUtil.loudest:
                                 print "output:",output
                                 sys.stdout.flush()
@@ -63,7 +64,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                                     pass
                             
                             #output is the input to the tests
-                            ret = subprocess.call('../ab-test/kernel "'+output+'"', shell=True)
+                            ret = subprocess.call(self.src_dir + '/kernel "'+output+'"', shell=True)
                             
                             _,tmp2 = tempfile.mkstemp()
                             
@@ -155,7 +156,7 @@ class ABMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             os.remove(tmp)
 
 alphabet = ['a','b']
-mat = ABMat(verbose = lstar.LStarUtil.loud)
+mat = ABMat("../ab-test", verbose = lstar.LStarUtil.loud)
 
 learner = lstar.LStar(alphabet, mat, verbose=lstar.LStarUtil.loud, seed=0)
 
