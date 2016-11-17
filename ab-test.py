@@ -171,5 +171,5 @@ stats = mat.getStats()
 print "========================================="
 print "|              Final Stats              |"
 print "========================================="
-for k,v in self.stats.iteritems():
+for k,v in stats.iteritems():
     print k,"=",v
