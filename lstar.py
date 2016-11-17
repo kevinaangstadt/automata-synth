@@ -327,9 +327,14 @@ class LStar(object):
                 pass
         
         # add new rows (S \cup S + A)
-        for s in self.observe.keys():
-            if s+new_suffix not in self.observe:
-                self.observe[s+new_suffix] = self.__get_row(s+new_suffix)
+        # test to see if we can just add the two rows instead of all rows
+        #for s in self.observe.keys():
+        #    if s+new_suffix not in self.observe:
+        #        self.observe[s+new_suffix] = self.__get_row(s+new_suffix)
+        if s_1+new_suffix not in self.observe:
+            self.observe[s_1+new_suffix] = self.__get_row(s_1+new_suffix)
+        if s_2+new_suffix not in self.observe:
+            self.observe[s_2+new_suffix] = self.__get_row(s_2+new_suffix)
         
         # add new column (E \cup {a + e})
         for s in self.observe:
