@@ -263,26 +263,38 @@ class LStar(object):
         # add a + e to E,
         # and extend T to (S \cup S + A) + E using membership queries.
         
+        # keep a chache of seeing this pairing on this round
+        cache = dict()
+        
         # while the property doesn't hold
-        #trying this brute force
         found_new_suffix = False
-        #while not found_new_suffix:
+        while not found_new_suffix:
             # find row(s_1) = row(s_2)
-            
-        for row_1 in self.observe:
-            if found_new_suffix:
-                break
-            s_1 = row_1
-            for row_2 in self.observe:
-                if row_1 == row_2:
-                    continue
-                s_2 = row_2
-            #while True:
-            #    s_1 = random.choice(self.observe.keys())
-            #    s_2 = random.choice(self.observe.keys())
+            while True:
+                s_1 = random.choice(self.observe.keys())
+                s_2 = random.choice(self.observe.keys())
                 # s_1 and s_2 should not be the same
-                #while s_1 == s_2:
-                #    s_2 = random.choice(self.observe.keys())
+                while s_1 == s_2:
+                    s_2 = random.choice(self.observe.keys())
+                
+                if s_1 in cache:
+                    if s_2 in cache[s_1]:
+                        # we've seen this before
+                        continue
+                    else:
+                        cache[s_1].append(s_2)
+                else:
+                    cache[s_1] = [ s_2 ]
+                
+                if s_2 in cache:
+                    if s_1 in cache[s_2]:
+                        # we've seen this before
+                        continue
+                    else:
+                        cache[s_2].append(s_1)
+                else:
+                    cache[s_2] = [ s_1 ]
+                
                 
                 if self.__get_row(s_1) == self.__get_row(s_2):
                     break
