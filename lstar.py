@@ -267,15 +267,26 @@ class LStar(object):
         found_new_suffix = False
         while not found_new_suffix:
             # find row(s_1) = row(s_2)
-            while True:
-                s_1 = random.choice(self.observe.keys())
-                s_2 = random.choice(self.observe.keys())
-                # s_1 and s_2 should not be the same
-                while s_1 == s_2:
-                    s_2 = random.choice(self.observe.keys())
-                
-                if self.__get_row(s_1) == self.__get_row(s_2):
+            #trying this brute force
+            found_equal_rows = False
+            for row_1 in self.observe:
+                if found_equal_rows:
                     break
+                s_1 = row_1
+                for row_2 in self.observe:
+                    if row_1 == row_2:
+                        continue
+                    s_2 = row_2
+            #while True:
+            #    s_1 = random.choice(self.observe.keys())
+            #    s_2 = random.choice(self.observe.keys())
+                # s_1 and s_2 should not be the same
+                #while s_1 == s_2:
+                #    s_2 = random.choice(self.observe.keys())
+                
+                    if self.__get_row(s_1) == self.__get_row(s_2):
+                        found_equal_rows = True
+                        break
                 
             for a in self.alphabet:
                 if found_new_suffix:
