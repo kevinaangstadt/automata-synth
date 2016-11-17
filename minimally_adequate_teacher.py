@@ -31,7 +31,7 @@ class MinimallyAdequateTeacher(object):
             self.stats['cache_misses'] += 1
             return None
         else:
-            self.stats['cache_misses'] += 1
+            self.stats['cache_hits'] += 1
             return self.cache[string]
         
     def addCache(self, string, value):
