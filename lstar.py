@@ -264,19 +264,19 @@ class LStar(object):
         # and extend T to (S \cup S + A) + E using membership queries.
         
         # while the property doesn't hold
+        #trying this brute force
         found_new_suffix = False
-        while not found_new_suffix:
+        #while not found_new_suffix:
             # find row(s_1) = row(s_2)
-            #trying this brute force
-            found_equal_rows = False
-            for row_1 in self.observe:
-                if found_equal_rows:
-                    break
-                s_1 = row_1
-                for row_2 in self.observe:
-                    if row_1 == row_2:
-                        continue
-                    s_2 = row_2
+            
+        for row_1 in self.observe:
+            if found_new_suffix:
+                break
+            s_1 = row_1
+            for row_2 in self.observe:
+                if row_1 == row_2:
+                    continue
+                s_2 = row_2
             #while True:
             #    s_1 = random.choice(self.observe.keys())
             #    s_2 = random.choice(self.observe.keys())
@@ -284,9 +284,8 @@ class LStar(object):
                 #while s_1 == s_2:
                 #    s_2 = random.choice(self.observe.keys())
                 
-                    if self.__get_row(s_1) == self.__get_row(s_2):
-                        found_equal_rows = True
-                        break
+                if self.__get_row(s_1) == self.__get_row(s_2):
+                    break
                 
             for a in self.alphabet:
                 if found_new_suffix:
