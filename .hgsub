@@ -3,3 +3,4 @@ pylstar = [git]https://github.com/gbossert/pylstar.git
 dot2anml = https://bitbucket.org/kevinaangstadt/dot2anml
 MNRL = [git]https://github.com/kevinaangstadt/mnrl.git
 vasim = [git]https://github.com/jackwadden/vasim.git
+cpachecker = [git]https://github.com/sosy-lab/cpachecker.git

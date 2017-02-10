@@ -4,7 +4,7 @@
 # University of Virginia
 
 import os,sys
-sys.path.append(os.path.dirname(os.path.abspath(sys.argv[0])) + '/MNRL')
+sys.path.append(os.path.dirname(os.path.abspath(sys.argv[0])) + '/MNRL/python')
 sys.path.append(os.path.dirname(os.path.abspath(sys.argv[0])) + '/dot2anml')
 
 import mnrl, mnrlerror
@@ -217,7 +217,7 @@ class LStar(object):
                     # only make a new state if we haven't make one for that input symbol yet
                     if src['portId'] not in anml_states[s]:
                         anml_states[s][src['portId']] = an.AddSTE(
-                            src['portId'],
+                            "\\x"+format(ord(src['portId']), "x"),
                             anmlId = "_" + str(num_states),
                             startType = anml.AnmlDefs.NO_START if mn.getNodeById(src['id']).enable == mnrl.MNRLDefs.ENABLE_ON_ACTIVATE_IN else anml.AnmlDefs.START_OF_DATA,
                             match = state.report
