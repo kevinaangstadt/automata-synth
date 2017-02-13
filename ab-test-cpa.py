@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
-import lstar, cpateacher
+import lstar, cpateacher, cparegexteacher
 
 alphabet = ['a','b']
-mat = cpateacher.CPAMat("test_kernels/ab-test",
-                        "vasim/vasim",
+#mat = cpateacher.CPAMat("test_kernels/ab-test",
+#                        "vasim/vasim",
+#                        "cpachecker/scripts/cpa.sh",
+#                        alphabet,
+#                        verbose=lstar.LStarUtil.loud)
+
+mat = cparegexteacher.CPAReMat("test_kernels/ab-test",
                         "cpachecker/scripts/cpa.sh",
                         alphabet,
                         verbose=lstar.LStarUtil.loud)
