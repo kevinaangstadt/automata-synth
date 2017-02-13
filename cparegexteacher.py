@@ -119,7 +119,7 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
               if trans(i, a, j):
                 A[i,j] := a
               else:
-                A[i,j] := epsilon
+                A[i,j] := null
         
         and then the solving:
         
@@ -170,20 +170,34 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             
             for _,j in anml.elements.iteritems():
                 if j.anmlId in [x.anmlId for x,_ in s.getActivate()]:
-                    tmp_list.append("UNION("+j.symbol+")")
+                    tmp_list.append(j.symbol)
                 else:
                     tmp_list.append("NULL")
             A.append(tmp_list)
         
         # okay; we're initialized
         for n in reversed(range(len(B))):
-            B[n] = "STAR(" + A[n][n] + ")" + B[n]
+            if A[n][n] is not "NULL" and B[n] is not "NULL":
+                B[n] = "STAR(" + A[n][n] + ")" + B[n]
+            else:
+                B[n] = "NULL"
             for j in range(len(B)):
-              A[n][j] = "STAR(" + A[n][n] + ")" + A[n][j]
+                if A[n][n] is not "NULL" and A[n][j] is not "NULL":
+                    A[n][j] = "STAR(" + A[n][n] + ")" + A[n][j]
+                else:
+                    A[n][j] = "NULL"
             for i in range(len(B)):
-                B[i] += A[i][n] + B[n]
+                if A[i][n] is not "NULL" and B[n] is not "NULL":
+                    if B[i] is not "NULL":
+                        B[i] = "UNION(" + B[i] + "," + A[i][n] + B[n] + ")"
+                    else:
+                        B[i] = A[i][n] + B[n]
                 for j in range(len(B)):
-                  A[i][j] += A[i][n] + A[n][j]
+                    if A[i][n] is not "NULL" and A[n][j] is not "NULL":
+                        if A[i][j] is not "NULL":
+                            A[i][j] = "UNION(" + A[i][j] + "," + A[i][n] + A[n][j] + ")"
+                        else:
+                            A[i][j] = A[i][n] + A[n][j]
         
        
         # in theory B[0] is what we want
