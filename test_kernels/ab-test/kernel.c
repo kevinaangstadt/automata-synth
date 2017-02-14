@@ -1,5 +1,5 @@
 int aaaab(char* input) {
-  const char comp[] = {'a','a','a','a','b'};
+  const char comp[] = "aaaab";
   int i = 0;
   while(i < 5) {
     if(comp[i] != input[i]) {

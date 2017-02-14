@@ -3,7 +3,7 @@ from __future__ import print_function
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(sys.argv[0])) + '/dot2anml')
 import tempfile, subprocess, re
-import lstar, minimally_adequate_teacher, tempdir, chdir, anml
+import lstar, minimally_adequate_teacher, tempdir, chdir, anml, brzozowski
 
 class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
     def __init__(self,
@@ -26,11 +26,7 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             print("====================")
             print("| Compiling Kernel |")
             print("====================")
-            sys.stdout.flush()
-            try:
-                os.fsync(sys.stdout.fileno())
-            except:
-                pass
+
         
         with tempdir.TemporaryDirectory() as tdir:
             _,tmp = tempfile.mkstemp(suffix=".c", dir=tdir)
@@ -83,125 +79,21 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             print("==========================")
             print("| Checking if equivalent |")
             print("==========================")
-            sys.stdout.flush()
-            try:
-                os.fsync(sys.stdout.fileno())
-            except:
-                pass
-        
-        print("foo")
-        # first, we need to get the regular expression from the state machine
-        
-        '''
-        I'm going to use Brzozowski algebraic method
-        http://cs.stackexchange.com/questions/2016/how-to-convert-finite-automata-to-regular-expressions
-        
-        The algorithm
-
-        Thanks to this, we can build the algorithm. To have the same convention than in the induction above, we will say that the initial state is q1
-        and that the number of state is m. First, the initialization to fill B
-        
-        :
-        
-        for i = 1 to m:
-          if final(i):
-            B[i] := epsilon
-          else:
-            B[i] := null
-        
-        and A
-        
-        :
-        
-        for i = 1 to m:
-          for j = 1 to m:
-            for a in Sigma:
-              if trans(i, a, j):
-                A[i,j] := a
-              else:
-                A[i,j] := null
-        
-        and then the solving:
-        
-        for n = m decreasing to 1:
-          B[n] := star(A[n,n]) . B[n]
-          for j = 1 to n:
-            A[n,j] := star(A[n,n]) . A[n,j];
-          for i = 1 to n:
-            B[i] += A[i,n] . B[n]
-            for j = 1 to n:
-              A[i,j] += A[i,n] . A[n,j]
-        
-        the final expression is then:
-        
-        e := B[1]
-        
-        '''
-        
-        # okay, let's do this
-        B = list()
-        B.append("NULL")
-        
-        for _,s in anml.elements.iteritems():
-            if s.match:
-                B.append("EPS")
-            else:
-                B.append("NULL")
-        
-        A = list()
-        # first row is just the dummy start state
-        tmp_list = list()
-        tmp_list.append("NULL")
-        for _,s in anml.elements.iteritems():
-            if s.startType == "start-of-data":
-                tmp_list.append("EPS")
-            else:
-                tmp_list.append("NULL")
-        A.append(tmp_list)
-        
-        # now go through all the states
-        for _,s in anml.elements.iteritems():
-            tmp_list = list()
-            # handle the fake starting state
-            if s.startType == "start-of-data":
-                tmp_list.append("EPS")
-            else:
-                tmp_list.append("NULL")
             
-            for _,j in anml.elements.iteritems():
-                if j.anmlId in [x.anmlId for x,_ in s.getActivate()]:
-                    tmp_list.append(j.symbol)
-                else:
-                    tmp_list.append("NULL")
-            A.append(tmp_list)
+        # first, we need to get the regular expression from the state machine
+        br = brzozowski.Machine(anml)
         
-        # okay; we're initialized
-        for n in reversed(range(len(B))):
-            if A[n][n] is not "NULL" and B[n] is not "NULL":
-                B[n] = "STAR(" + A[n][n] + ")" + B[n]
-            else:
-                B[n] = "NULL"
-            for j in range(len(B)):
-                if A[n][n] is not "NULL" and A[n][j] is not "NULL":
-                    A[n][j] = "STAR(" + A[n][n] + ")" + A[n][j]
-                else:
-                    A[n][j] = "NULL"
-            for i in range(len(B)):
-                if A[i][n] is not "NULL" and B[n] is not "NULL":
-                    if B[i] is not "NULL":
-                        B[i] = "UNION(" + B[i] + "," + A[i][n] + B[n] + ")"
-                    else:
-                        B[i] = A[i][n] + B[n]
-                for j in range(len(B)):
-                    if A[i][n] is not "NULL" and A[n][j] is not "NULL":
-                        if A[i][j] is not "NULL":
-                            A[i][j] = "UNION(" + A[i][j] + "," + A[i][n] + A[n][j] + ")"
-                        else:
-                            A[i][j] = A[i][n] + A[n][j]
+        if self.verbose >= lstar.LStarUtil.loudest:
+            print("Adj")
+            br.printAdj()
+            print("B")
+            br.printB()
+           
+        regex = (br.brzozowski().simplify())
         
+        if self.verbose >= lstar.LStarUtil.louder:
+            print("The machine represents:", regex)
        
-        # in theory B[0] is what we want
-        print( B[0] )
       
         # make a temp directory to do all of our work in
         with tempdir.TemporaryDirectory(prefix="cpamat") as tdir:
@@ -210,6 +102,34 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
             with open(anml_file, "w") as f:
                 f.write(str(anml))
                 
+            
+            # now make the file that cpachecker will check
+            # this should have both the kernel function and the regex
+            # we then look for the symmetric difference
+            
+            _,checker_file = tempfile.mkstemp(prefix="cpa", suffix=".c", dir=tdir)
+            with open(checker_file, "w") as f:
+                print('#include "kernel.c"', file=f)
+                
+                print('int difference(char* input) {', file=f)
+                
+                print('if( (kernel(input) && !__cpa_regex(input,"{}")) || (!kernel(input) && __cpa_regex(input,"{}")) ) {{'.format(regex,regex), file=f)
+
+                
+                print('ERROR: return 1;', file=f)
+                
+                
+                print( '} else { return 0; }', file=f )
+                
+                print('}', file=f)
+                
+            with chdir.ChDir(tdir):
+                # preprocess the checker file with gcc
+                subprocess.call(["gcc",
+                                 "-iquote{}".format(os.path.abspath(self.src_dir)),
+                                 "-E",
+                                 checker_file,
+                                 "-o", "cpa.i"])
             raw_input("waiting")
         
         return (True, None)
