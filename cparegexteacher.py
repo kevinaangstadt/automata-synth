@@ -114,12 +114,14 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                 print('int difference(char* input) {', file=f)
                 
                 print('if( (kernel(input) && !__cpa_regex(input,"{}")) || (!kernel(input) && __cpa_regex(input,"{}")) ) {{'.format(regex,regex), file=f)
-
                 
+                
+               # print('if( __cpa_regex(input"{}")) {{'.format("".join(["({})".format(x) for x in self.alphabet])), file=f)
                 print('ERROR: return 1;', file=f)
                 
+               # print('}', file=f)
                 
-                print( '} else { return 0; }', file=f )
+                print( '} return 0; ', file=f )
                 
                 print('}', file=f)
                 

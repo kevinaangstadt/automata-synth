@@ -20,7 +20,7 @@ class EmptyRegex(Regex):
 
 class EpsilonRegex(Regex):
     def __str__(self):
-        return ""
+        return "eps"
     def __eq__(self, other):
         return isinstance(other,EpsilonRegex)
     def simplify(self):
@@ -73,7 +73,7 @@ class ConcatRegex(Regex):
         self.re1 = re1
         self.re2 = re2
     def __str__(self):
-        return "{}{}".format(str(self.re1),str(self.re2))
+        return "({})({})".format(str(self.re1),str(self.re2))
     def __eq__(self, other):
         if isinstance(other, ConcatRegex):
             return self.re1 == other.re1 and self.re2 == other.re2
