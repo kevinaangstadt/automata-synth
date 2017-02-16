@@ -10,8 +10,9 @@ alphabet = ['a','b']
 #                        verbose=lstar.LStarUtil.loud)
 
 mat = cparegexteacher.CPAReMat("test_kernels/ab-test",
-                        "cpachecker/scripts/cpa.sh",
+                        "/home/kangstadt/git/cpachecker/scripts/cpa.sh",
                         alphabet,
+                        "cpa-test-output",
                         verbose=lstar.LStarUtil.loudest)
 
 learner = lstar.LStar(alphabet, mat, verbose=lstar.LStarUtil.loud, seed=0)
