@@ -11,10 +11,12 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                cpachecker_executable,
                alphabet,
                loggingdir,
+               eq,
                verbose=0):
         """src_dir should contain the kernel"""
         super(CPAReMat, self).__init__()
         self.verbose = verbose
+        self.eq = eq
         
         print(src_dir)
         
@@ -140,19 +142,26 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                 
                 print('int difference(char* input) {', file=f)
                 
-                print('if(__cpa_strlen(input) > 0) {', file=f)
+                #if self.eq:
+                #    print('if(!__cpa_streq(input, "")) {', file=f)
+                #else:
+                #    print('if(__cpa_strlen(input) > 0) {', file=f)
                 
                 print('if( (kernel(input) && !__cpa_regex(input,"{}")) || (!kernel(input) && __cpa_regex(input,"{}")) ) {{'.format(regex,regex), file=f)
                 
-                
-               # print('if( __cpa_regex(input"{}")) {{'.format("".join(["({})".format(x) for x in self.alphabet])), file=f)
+                if len(self.alphabet) == 1:
+                    language_regex = "\\x"+format(ord(self.alphabet[0]))
+                else:
+                    language_regex = reduce(lambda s, a: "({}|\\x{})".format(s,format(ord(a), "x")), self.alphabet[2:], "(\\x{}|\\x{})".format(format(ord(self.alphabet[0]),"x"),format(ord(self.alphabet[1]),"x")) )
+                print('if( __cpa_regex(input, "({})(({})*)")) {{'.format(language_regex, language_regex), file=f)
                 print('ERROR: return 1;', file=f)
                 
                # print('}', file=f)
                 
-                print( '} return 0; ', file=f )
+                
                 
                 print('}', file=f)
+                print( '} return 0; ', file=f )
                 
                 print('}', file=f)
                 
