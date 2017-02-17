@@ -34,5 +34,5 @@ int b_star(char* input) {
 }
 
 int kernel(char* input) {
-  return aaaab(input) || a_star(input) || b_star(input);
+  return input[0] != '\0' && ( aaaab(input) || a_star(input) || b_star(input) );
 }

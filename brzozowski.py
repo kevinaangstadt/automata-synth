@@ -64,7 +64,7 @@ class UnionRegex(Regex):
             re2 = self.re2.simplify()
             r = UnionRegex(re1, re2)
             
-            if isinstance(re1, EmptyRegex) or isinstance(re1, EpsilonRegex) or isinstance(re2, EmptyRegex) or isinstance(re2, EpsilonRegex):
+            if isinstance(re1, EmptyRegex) or isinstance(re2, EmptyRegex):
                 r = r.simplify()
         return r
 

@@ -4,6 +4,7 @@ import lstar, cpateacher, cparegexteacher
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument("kerneldir")
     parser.add_argument("outputlocation")
     parser.add_argument("--eq", action="store_true")
     
@@ -16,8 +17,8 @@ if __name__ == '__main__':
     #                        alphabet,
     #                        verbose=lstar.LStarUtil.loud)
     
-    mat = cparegexteacher.CPAReMat("test_kernels/ab-test",
-                            "/home/kaa2nx/git/cpachecker/scripts/cpa.sh",
+    mat = cparegexteacher.CPAReMat(args.kerneldir,
+                            "/home/kangstadt/git/cpachecker/scripts/cpa.sh",
                             alphabet,
                             args.outputlocation,
                             args.eq,

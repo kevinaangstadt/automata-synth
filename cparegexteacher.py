@@ -183,6 +183,8 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             "-setprop", 'cpa.predicate.handleArrays=true',
                             "-setprop", "counterexample.export.model=Counterexample.%d.assignment.txt",
                             "-setprop", "counterexample.export.formula=Counterexample.%d.smt2",
+                            "-setprop", "cpa.predicate.refinement.getUsefulBlocks=false",
+                            "-setprop", "cpa.predicate.refinement.strategy=TREE",
                             "cpa.i"])
             
             # FIXME check for a counterexample
