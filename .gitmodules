@@ -1,16 +1,7 @@
 [submodule "cpachecker"]
 	path = cpachecker
-	url = https://github.com/sosy-lab/cpachecker.git
-[submodule "klee"]
-	path = klee
-	url = https://github.com/klee/klee.git
+	url = https://github.com/kevinaangstadt/cpachecker.git
 [submodule "MNRL"]
 	path = MNRL
 	url = https://github.com/kevinaangstadt/mnrl.git
-[submodule "pylstar"]
-	path = pylstar
-	url = https://github.com/gbossert/pylstar.git
-[submodule "vasim"]
-	path = vasim
-	url = https://github.com/jackwadden/vasim.git
 
