@@ -18,7 +18,7 @@ if __name__ == '__main__':
     #                        verbose=lstar.LStarUtil.loud)
     
     mat = cparegexteacher.CPAReMat(args.kerneldir,
-                            "/home/kangstadt/git/cpachecker/scripts/cpa.sh",
+                            "/home/kaa2nx/git/cpachecker/scripts/cpa.sh",
                             alphabet,
                             args.outputlocation,
                             args.eq,

@@ -146,14 +146,19 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                 #    print('if(!__cpa_streq(input, "")) {', file=f)
                 #else:
                 #    print('if(__cpa_strlen(input) > 0) {', file=f)
-                
-                print('if( (kernel(input) && !__cpa_regex(input,"{}")) || (!kernel(input) && __cpa_regex(input,"{}")) ) {{'.format(regex,regex), file=f)
-                
+                print("int k,r;", file=f)
+                print("k = kernel(input);", file=f)
+                print('r = __cpa_regex(input,"{}");'.format(regex), file=f)
                 if len(self.alphabet) == 1:
                     language_regex = "\\x"+format(ord(self.alphabet[0]))
                 else:
                     language_regex = reduce(lambda s, a: "({}|\\x{})".format(s,format(ord(a), "x")), self.alphabet[2:], "(\\x{}|\\x{})".format(format(ord(self.alphabet[0]),"x"),format(ord(self.alphabet[1]),"x")) )
                 print('if( __cpa_regex(input, "({})(({})*)")) {{'.format(language_regex, language_regex), file=f)
+                
+                print("if (k != r) {", file=f)
+                #print('if( (kernel(input) && !__cpa_regex(input,"{}")) || (!kernel(input) && __cpa_regex(input,"{}")) ) {{'.format(regex,regex), file=f)
+                
+                
                 print('ERROR: return 1;', file=f)
                 
                # print('}', file=f)
@@ -183,8 +188,11 @@ class CPAReMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                             "-setprop", 'cpa.predicate.handleArrays=true',
                             "-setprop", "counterexample.export.model=Counterexample.%d.assignment.txt",
                             "-setprop", "counterexample.export.formula=Counterexample.%d.smt2",
-                            "-setprop", "cpa.predicate.refinement.getUsefulBlocks=false",
-                            "-setprop", "cpa.predicate.refinement.strategy=TREE",
+                            "-setprop", "log.level=All",
+                            "-setprop", "solver.z3.log=z3.log",
+                            "-setprop", "cpa.predicate.blk.threshold=1", #Small Block Encoding
+                            #"-setprop", "cpa.predicate.refinement.getUsefulBlocks=false",
+                            #"-setprop", "cpa.predicate.refinement.strategy=TREE",
                             "cpa.i"])
             
             # FIXME check for a counterexample

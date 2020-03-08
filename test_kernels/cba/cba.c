@@ -1,4 +1,4 @@
-int main(char* input) {
+int kernel(char* input) {
   int i = 0;
   if( input[0] != 'c' ){
     return 0;
@@ -10,8 +10,7 @@ int main(char* input) {
   i++;
   if( input[2] != 'a' ){
     return 0;
-  } else {
-    ERROR: return 1;
-  }
+  } 
+  return 1;
 }
   

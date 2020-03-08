@@ -1,11 +1,15 @@
 """ Implements the Brzozowski method of converting state machine into RegEx """
 
-import inspect, os, sys
+import inspect, logging, os, sys
 import copy
 
 sys.path.insert(0,os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/dot2anml")
+sys.path.insert(0,os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/MNRL/python")
 
 from anml import *
+from mnrl import *
+
+logger = logging.getLogger(__name__)
 
 class Regex(object):
     pass
@@ -44,7 +48,7 @@ class UnionRegex(Regex):
         self.re1 = re1
         self.re2 = re2
     def __str__(self):
-        return "({}|{})".format(str(self.re1),str(self.re2))
+        return "({})|({})".format(str(self.re1),str(self.re2))
     def __eq__(self, other):
         if isinstance(other, UnionRegex):
             return self.re1 == other.re1 and self.re2 == other.re2
@@ -66,6 +70,7 @@ class UnionRegex(Regex):
             
             if isinstance(re1, EmptyRegex) or isinstance(re2, EmptyRegex):
                 r = r.simplify()
+        # logger.debug("replacing %s with %s", str(self), str(r))
         return r
 
 class ConcatRegex(Regex):
@@ -95,6 +100,7 @@ class ConcatRegex(Regex):
             
             if isinstance(re1, EmptyRegex) or isinstance(re1, EpsilonRegex) or isinstance(re2, EmptyRegex) or isinstance(re2, EpsilonRegex):
                 r = r.simplify()
+        # logger.debug("replacing %s with %s", str(self), str(r))
         return r
 
     
@@ -118,6 +124,7 @@ class StarRegex(Regex):
             r = StarRegex(re)
             if isinstance(re, EmptyRegex) or isinstance(re, EpsilonRegex):
                 r = r.simplify()
+        # logger.debug("replacing %s with %s", str(self), str(r))
         return r
         
 class Machine(object):
@@ -127,6 +134,11 @@ class Machine(object):
         # note...this only supports start of data
         # note...we assume one character per state right now
         # okay, let's do this
+        
+        if inspect.isclass(MNRLNetwork):
+            self.__init_mnrl(an)
+            return
+         
         self.B = list()
         self.B.append(EmptyRegex())
         
@@ -160,6 +172,42 @@ class Machine(object):
                     tmp_list.append(EmptyRegex())
             self.A.append(tmp_list)
     
+    def __init_mnrl(self, mn):
+        '''mn is a MNRL network'''
+        # This should mostly mirror above
+        self.B = list()
+        self.B.append(EmptyRegex())
+        
+        for _,s in mn.nodes.iteritems():
+            if s.report:
+                self.B.append(EpsilonRegex())
+            else:
+                self.B.append(EmptyRegex())
+                
+        self.A = list()
+        # first row is just the dummy start state
+        tmp_list = list()
+        tmp_list.append(EmptyRegex())
+        for _,s in mn.nodes.iteritems():
+            if s.enable == MNRLDefs.ENABLE_ON_START_AND_ACTIVATE_IN:
+                tmp_list.append(CarRegex(s.symbols))
+            else:
+                tmp_list.append(EmptyRegex())
+        self.A.append(tmp_list)
+        
+        # now go through all the states
+        for _,s in mn.nodes.iteritems():
+            tmp_list = list()
+            # handle the fake starting state
+            tmp_list.append(EmptyRegex())
+            
+            for _,j in mn.nodes.iteritems():
+                if j.id in [x["id"] for x in s.getOutputConnections()[MNRLDefs.H_STATE_OUTPUT][1]]:
+                    tmp_list.append(CarRegex(j.symbols))
+                else:
+                    tmp_list.append(EmptyRegex())
+            self.A.append(tmp_list)
+    
     def printB(self):
         print " ; ".join([str(b) for b in self.B])
     
@@ -167,18 +215,57 @@ class Machine(object):
         for row in self.A:
             print " ; ".join([str(a) for a in row])
     
+    def __one_simplify(self, re):
+      if isinstance(re, UnionRegex):
+        if re.re1 == re.re2:
+          re = re.re1
+        elif isinstance(re.re1, UnionRegex):
+          re = UnionRegex(re.re1.re1, UnionRegex(re.re1.re2, re.re2))
+        elif isinstance(re.re1, EmptyRegex):
+          re = re.re2
+        elif isinstance(re.re2, EmptyRegex):
+          re = re.re1
+      elif isinstance(re, ConcatRegex):
+        if isinstance(re.re1, ConcatRegex):
+          re = ConcatRegex(re.re1.re1, ConcatRegex(re.re1.re2, re.re2))
+        elif isinstance(re.re1, EpsilonRegex):
+          re = re.re2
+        elif isinstance(re.re2, EpsilonRegex):
+          re = re.re1
+        elif isinstance(re.re1, EmptyRegex) or isinstance(re.re2, EmptyRegex):
+          re = EmptyRegex()
+      elif isinstance(re, StarRegex):
+        if isinstance(re.re, EmptyRegex):
+          re = EpsilonRegex()
+        elif isinstance(re.re, EpsilonRegex):
+          re = EpsilonRegex()
+      return re
+    
+    @staticmethod
+    def re_to_str(re):
+      stack = [re]
+      
+      while len(stack) != 0:
+        curr = stack.pop()
+         
+    
     def brzozowski(self):
+        logger.info("Constructing RE from automaton")
         m = len(self.A)
         A = copy.deepcopy(self.A)
         b = copy.deepcopy(self.B)
         for n in reversed(range(m)):
-            b[n] = ConcatRegex(StarRegex(A[n][n]), b[n])
+            b[n] = self.__one_simplify(ConcatRegex(self.__one_simplify(StarRegex(A[n][n])), b[n]))
             for j in range(n):
-                A[n][j] = ConcatRegex(StarRegex(A[n][n]),A[n][j])
+                A[n][j] = self.__one_simplify(ConcatRegex(self.__one_simplify(StarRegex(A[n][n])),A[n][j]))
             for i in range(n):
-                b[i] = UnionRegex(b[i], ConcatRegex(A[i][n],b[n]))
+                b[i] = self.__one_simplify(UnionRegex(b[i], self.__one_simplify(ConcatRegex(A[i][n],b[n]))))
                 for j in range(n):
-                    A[i][j] = UnionRegex(A[i][j], ConcatRegex(A[i][n],A[n][j]))
+                    A[i][j] = self.__one_simplify(UnionRegex(A[i][j], self.__one_simplify(ConcatRegex(A[i][n],A[n][j]))))
             for i in range(n):
                 A[i][n] = EmptyRegex()
-        return b[0].simplify()
+        #logger.debug("Unsimplified RE: %s", b[0])
+        logger.info("Beginning simplification")
+        b[0] = b[0].simplify()
+        logger.info("Done with simplification")
+        return b[0]
