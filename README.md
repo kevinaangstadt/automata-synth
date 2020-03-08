@@ -17,14 +17,14 @@ is correct up to some fixed input length.
 AutomataSynth requires the following software:
 
 - Python 2
-- Java 8 or 9
+- Java 9 or 11
 - Ant
 
 Additionally, see `requirements.txt` for a list of required python packages.
 
 ## Getting Started
 
-AutomataSynth has been tested on Ubuntu 16.04.  Your mileage on other platforms
+AutomataSynth has been tested on Ubuntu 18.04.  Your mileage on other platforms
 will vary.
 
 **Note:** Run `setup.sh` to automatically install all required packages and
@@ -70,7 +70,8 @@ You may try AutomataSynth on one of the provided test kernels.  For example:
 
 ```bash
 ./cpabmcseq-test-driver.py --time-limit 5m --kernel-file kernel.c \
-  --kernel-function kernel --return-int test_kernels/ab-test test-output
+  --kernel-function kernel --return-int --max-inp-length 5 test_kernels/astarb \
+  test-output
 ```
 
 ## Publications

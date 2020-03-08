@@ -193,7 +193,7 @@ class CpaBmcSeqMat(minimally_adequate_teacher.MinimallyAdequateTeacher):
                 
                 cpa_invocation = [
                     self.cpachecker,
-                    "-stack", "1200m",
+                    "-stack", "1000m",
                     "-bmc-incremental",
                     "-setprop", "solver.solver=z3",
                     "-setprop", "solver.z3.stringSolver=seq",
