@@ -2,7 +2,7 @@
 # for Angluin L* Algorithm
 #
 # Kevin Angstadt
-# University of Virginia
+# University of Michigan
 
 class MinimallyAdequateTeacher(object):
     

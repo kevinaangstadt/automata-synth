@@ -1,11 +1,10 @@
 # Angluin L* Algorithm
 #
 # Kevin Angstadt
-# University of Virginia
+# University of Michigan
 
 import logging, os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/MNRL/python')
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/dot2anml')
 
 import mnrl, mnrlerror
 import anml

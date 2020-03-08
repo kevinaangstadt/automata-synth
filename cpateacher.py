@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(sys.argv[0])) + '/dot2anml')
 import tempfile, subprocess, re
 import lstar, minimally_adequate_teacher, tempdir, chdir, anml
 
