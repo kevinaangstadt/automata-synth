@@ -1,30 +1,91 @@
+# AutomataSynth
+
+AutomataSynth is a framework for converting certain classes of functions to a
+format that can be executed by modern hardware accelerators, such as FPGAs.
+AutomataSynth dynamically observes and statically analyzes program behavior to
+learn a behaviorally-equivalent finite automaton that can be transformed into a
+hardware description.
+
+Currently, there is support for C Boolean string kernels (i.e., functions with a
+high-level type signature `String -> bool`).  For kernels deciding a regular
+language, the theoretical AutomataSynth algorithm can learn a fully-equivalent
+model.  In the general case, AutomataSynth will learn an approximate model that
+is correct up to some fixed input length.
+
+## Requirements
+
+AutomataSynth requires the following software:
+
+- Python 2
+- Java 8 or 9
+- Ant
+
+Additionally, see `requirements.txt` for a list of required python packages.
+
 ## Getting Started
 
-1. Make a docker image:
+AutomataSynth has been tested on Ubuntu 16.04.  Your mileage on other platforms
+will vary.
 
-        $ cd klee
-        $ docker build -t klee/klee .
+**Note:** Run `setup.sh` to automatically install all required packages and
+*build the required submodules.
 
-2. Create a docker container:
+### Prepare to Run
+Either run `setup.sh` or use the following steps.
 
-        $ docker run -ti --name=automata-synth --ulimit='stack=-1:-1' klee/klee
+1. Install the required software packages (see above).
 
-3. `update-alternatives` messes up trying to install python2 for mercurial
+2. Clone this repository
 
-        $ sudo update-alternatives --remove python /usr/bin/python3
+  ```
+  git clone https://github.com/kevinaangstadt/automata-synth
+  ```
 
-4. Install `nano` and `mercurial`
+3. Initialize the repository's submodules
 
-5. Clone this repository
+  ```
+  cd automata-synth
+  git submodule update --init
+  ```
 
-6. Install more dependencies
+4. Build CPAChecker.
 
-        $ sudo apt-get install software-properties-common python-software-properties
-        $ sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        $ sudo apt-get update
-        $ sudo apt-get install gcc-5 g++-5
+  ```
+  cd cpachecker
+  ant
+  ```
 
-7. Make VASim
+### Basic Usage
 
-        $ cd vasim
-        $ make
+We assume that the code to be transformed lives in some "kernel directory".
+When specifying a kernel file, this should be relative to this directory.
+
+The entry point of AutomataSynth is `cpabmcseq-test-driver.py`.  Run this script
+without any arguments to see a help message describing the various command line
+arguments.
+
+### Example
+
+You may try AutomataSynth on one of the provided test kernels.  For example:
+
+```bash
+./cpabmcseq-test-driver.py --time-limit 5m --kernel-file kernel.c \
+  --kernel-function kernel --return-int test_kernels/ab-test test-output
+```
+
+## Publications
+
+The following publications are associated with AutomataSynth:
+
+- Kevin Angstadt, Jean-Baptiste Jeannin, and Westley Weimer. Accelerating Legacy
+  String Kernels via Bounded Automata Learning. In _Proceedings of the 25th
+  International Conference on Architectural Support for Programming Languages
+  and Operating Systems_, ASPLOS '20. Lausanne, Switzerland, 2020. ACM.
+
+## Acknowledgements
+
+This work is funded in part by: NSF grants CCF-1629450, CCF-1763674,
+CCF-1908633; AFRL Contract No. FA8750-19- 1-0501; and the Jefferson Scholars
+Foundation. We also wish to thank Kevin Skadron and Lu Feng for their
+suggestions, encouragement, and expertise in the early stages of this project as
+well as the anonymous reviewers for their helpful comments and feedback.
