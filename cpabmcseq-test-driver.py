@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import argparse, datetime, errno, logging, os, time
 import parsedatetime
 import lstar, cpabmcseqteacher
