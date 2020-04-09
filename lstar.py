@@ -127,7 +127,7 @@ class LStar(object):
         # make output port mapping
         output_ports = list()
         for a in self.alphabet:
-            output_ports.append((a, a))
+            output_ports.append(("\\x{0:02x}".format(ord(a)), "\\x{0:02x}".format(ord(a))))
 
         unique_rows = list()
 
@@ -409,7 +409,7 @@ class LStar(object):
               stream = "{0}\\x{1:02x}".format(stream, i)
           
           else:
-            # if we are ina grange, a dash has already been set
+            # if we are in a crange, a dash has already been set
             # check to see if we need to end the range
             if last_val is not None and last_val != (i - 1):
               # if we're out of range
@@ -424,5 +424,10 @@ class LStar(object):
               stream = "{0}\\x{1:02x}".format(stream, i)
           
           last_val = i
+        
+      # if we were in a range when we finished, make sure to emit the last
+      # value
+      if crange:
+        stream += "\\x{0:02x}".format(last_val)
         
       return stream + "]"
